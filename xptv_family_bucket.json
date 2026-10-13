@@ -280,7 +280,7 @@
       "key": "cms01",
       "name": "量子资源",
       "type": 1,
-      "api": "http://cj.lziapi.com/api.php/provide/vod",
+      "api": "http://cj.lziapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -289,7 +289,7 @@
       "key": "cms02",
       "name": "非凡资源",
       "type": 1,
-      "api": "http://cj.ffzyapi.com/api.php/provide/vod",
+      "api": "http://cj.ffzyapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -298,7 +298,7 @@
       "key": "cms03",
       "name": "暴风资源",
       "type": 1,
-      "api": "https://bfzyapi.com/api.php/provide/vod",
+      "api": "https://bfzyapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -307,7 +307,7 @@
       "key": "cms04",
       "name": "光速资源",
       "type": 1,
-      "api": "https://api.guangsuapi.com/api.php/provide/vod",
+      "api": "https://api.guangsuapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -316,7 +316,7 @@
       "key": "cms05",
       "name": "红牛资源",
       "type": 1,
-      "api": "https://www.hongniuzy2.com/api.php/provide/vod",
+      "api": "https://www.hongniuzy2.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -325,7 +325,7 @@
       "key": "cms06",
       "name": "极速资源",
       "type": 1,
-      "api": "https://jszyapi.com/api.php/provide/vod",
+      "api": "https://jszyapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -334,7 +334,7 @@
       "key": "cms07",
       "name": "豪华资源",
       "type": 1,
-      "api": "https://hhzyapi.com/api.php/provide/vod",
+      "api": "https://hhzyapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -343,7 +343,7 @@
       "key": "cms08",
       "name": "索尼资源",
       "type": 1,
-      "api": "https://suoniapi.com/api.php/provide/vod",
+      "api": "https://suoniapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -352,7 +352,7 @@
       "key": "cms09",
       "name": "无尽资源",
       "type": 1,
-      "api": "https://api.wujinapi.com/api.php/provide/vod",
+      "api": "https://api.wujinapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -361,7 +361,7 @@
       "key": "cms10",
       "name": "魔都资源",
       "type": 1,
-      "api": "https://caiji.moduapi.cc/api.php/provide/vod",
+      "api": "https://caiji.moduapi.cc/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -370,7 +370,7 @@
       "key": "cms11",
       "name": "百度资源",
       "type": 1,
-      "api": "https://api.apibdzy.com/api.php/provide/vod",
+      "api": "https://api.apibdzy.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -379,7 +379,7 @@
       "key": "cms12",
       "name": "360资源",
       "type": 1,
-      "api": "https://360zy.com/api.php/provide/vod",
+      "api": "https://360zy.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -388,7 +388,7 @@
       "key": "cms13",
       "name": "电影天堂资源",
       "type": 1,
-      "api": "http://caiji.dyttzyapi.com/api.php/provide/vod",
+      "api": "http://caiji.dyttzyapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -397,7 +397,7 @@
       "key": "cms14",
       "name": "墨斗",
       "type": 1,
-      "api": "https://www.mdzyapi.com/api.php/provide/vod",
+      "api": "https://www.mdzyapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -406,7 +406,7 @@
       "key": "cms15",
       "name": "金鹰",
       "type": 1,
-      "api": "https://jinyingzy.com/api.php/provide/vod",
+      "api": "https://jinyingzy.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -415,7 +415,7 @@
       "key": "cms16",
       "name": "牛牛",
       "type": 1,
-      "api": "https://api.niuniuzy.me/api.php/provide/vod",
+      "api": "https://api.niuniuzy.me/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -424,7 +424,7 @@
       "key": "cms17",
       "name": "丫丫",
       "type": 1,
-      "api": "https://cj.yayazy.net/api.php/provide/vod",
+      "api": "https://cj.yayazy.net/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -433,7 +433,7 @@
       "key": "cms18",
       "name": "闪电",
       "type": 1,
-      "api": "http://sdzyapi.com/api.php/provide/vod",
+      "api": "http://sdzyapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -442,7 +442,7 @@
       "key": "cms19",
       "name": "樱花",
       "type": 1,
-      "api": "https://m3u8.apiyhzy.com/api.php/provide/vod",
+      "api": "https://m3u8.apiyhzy.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -451,7 +451,7 @@
       "key": "cms20",
       "name": "虎牙",
       "type": 1,
-      "api": "https://www.huyaapi.com/api.php/provide/vod",
+      "api": "https://www.huyaapi.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -460,7 +460,7 @@
       "key": "cms21",
       "name": "飘零",
       "type": 1,
-      "api": "https://p2100.net/api.php/provide/vod",
+      "api": "https://p2100.net/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -469,7 +469,7 @@
       "key": "cms22",
       "name": "速博",
       "type": 1,
-      "api": "https://subocaiji.com/api.php/provide/vod",
+      "api": "https://subocaiji.com/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -478,7 +478,7 @@
       "key": "cms23",
       "name": "最大",
       "type": 1,
-      "api": "http://zuidazy.me/api.php/provide/vod",
+      "api": "http://zuidazy.me/api.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -487,7 +487,7 @@
       "key": "cms24",
       "name": "新浪",
       "type": 1,
-      "api": "https://api.xinlangapi.com/xinlangapi.php/provide/vod",
+      "api": "https://api.xinlangapi.com/xinlangapi.php/provide/vod/",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
