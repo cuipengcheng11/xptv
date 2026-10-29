@@ -1,7 +1,7 @@
 WidgetMetadata = {
   id: "forward.douyin-live",
   title: "抖音直播",
-  version: "1.0.0",
+  version: "1.0.1",
   requiredVersion: "0.0.1",
   description: "按直播间 ID 列出抖音直播间，点开解析 FLV/HLS 拉流地址。注意：抖音没有公开的直播列表接口，这个模块不是推荐列表，必须你自己填直播间 ID；抖音反爬/签名变化时解析可能失效，需要登录 Cookie 才能看需登录的房间。",
   author: "Forward",
@@ -39,17 +39,29 @@ function parseRoomId(input) {
 }
 
 function extractStream(html) {
-  const text = typeof html === "string" ? html : JSON.stringify(html || "");
+  const raw = typeof html === "string" ? html : JSON.stringify(html || "");
+  // 关键修复：抖音直播页是把 JSON 再转义一层嵌在 HTML script 里的，
+  // 原文是 \"hls_pull_url\":\"http...\" 和 flv_pull_url:{FULL_HD1:"http..."} 这种对象形式，
+  // 直接按 "hls_pull_url":"..." 匹配会因为反斜杠和对象形式都匹配不到，这就是之前“未解析到”的原因。
+  // 先反转义，再统一匹配。
+  const text = raw.replace(/\\"/g, '"').replace(/\\u002F/g, "/").replace(/\\u0026/g, "&");
   const out = {};
-  // 抖音直播页里常见的拉流字段，优先 HLS（系统播放器兼容最好），其次 FLV
-  const hls = text.match(/"hls_pull_url"\s*:\s*"([^"]+)"/);
-  const flv = text.match(/"flv_pull_url"\s*:\s*"([^"]+)"/);
+  // 优先 HLS（系统播放器兼容最好），其次 FLV；三种真实形式都覆盖：
+  // 1) "hls_pull_url":"http://...m3u8"
+  // 2) "hls_pull_url_map":{"FULL_HD1":"http://...m3u8"}
+  // 3) "flv_pull_url":{"FULL_HD1":"http://...flv"}
+  const hls = text.match(/"hls_pull_url"\s*:\s*"([^"]+\.m3u8[^"]*)"/);
+  const hlsMap = text.match(/"hls_pull_url_map"\s*:\s*{\s*"[^"]+"\s*:\s*"([^"]+\.m3u8[^"]*)"/);
+  const flvMap = text.match(/"flv_pull_url"\s*:\s*{\s*"[^"]+"\s*:\s*"([^"]+\.flv[^"]*)"/);
+  const flv = text.match(/"flv_pull_url"\s*:\s*"([^"]+\.flv[^"]*)"/);
+  if (hls) out.videoUrl = hls[1];
+  else if (hlsMap) out.videoUrl = hlsMap[1];
+  else if (flvMap) out.videoUrl = flvMap[1];
+  else if (flv) out.videoUrl = flv[1];
   const title = text.match(/"title"\s*:\s*"([^"]+)"/);
   const cover = text.match(/"cover"\s*:\s*{\s*"url_list"\s*:\s*\[\s*"([^"]+)"/) || text.match(/"avatar_thumb"[^}]*"url_list"\s*:\s*\[\s*"([^"]+)"/);
-  if (hls) out.videoUrl = hls[1].replace(/\\u002F/g, "/");
-  else if (flv) out.videoUrl = flv[1].replace(/\\u002F/g, "/");
   if (title) out.title = title[1];
-  if (cover) out.posterPath = cover[1].replace(/\\u002F/g, "/");
+  if (cover) out.posterPath = cover[1];
   return out;
 }
 
@@ -126,3 +138,4 @@ async function loadDetail(link) {
     return null;
   }
 }
+
