@@ -1,9 +1,10 @@
 WidgetMetadata = {
   id: "forward.huya-live",
   title: "虎牙直播",
-  version: "1.0.3",
+  version: "1.0.4",
   requiredVersion: "0.0.1",
-  description: "虎牙直播：热门列表直接用虎牙公开列表接口（不用登录、不用填 ID），点开现解析拉流地址。带直播线路和清晰度选择：默认线路=自动，自动时会按 TX、AL、HS、HS24、HW、AL13、TX15 的顺序逐条试，不只看 m3u8 有没有返回，还会去拿第一个 TS 片段，能下载到才算这条线路可用，拿不到就换下一条；手动选某条线路时也会在该线路不可用时兜底换线路。清晰度用虎牙转码流实现：流畅=_500、超清=_2000、蓝光4M=_4000、蓝光10M=_10000，接在流名后面（实测 660000 间这四档都返回可用 m3u8），转码档拿不到时自动回落原画。默认自动 + 流畅（最不卡）：虎牙 HLS 一次只给约 3 个片段、约 6 秒缓冲，原画 10M 在网络一般时跟不上就会几秒后黑屏转圈。拉流地址带有时效签名，每次点开都会重新解析，不要保存旧地址。",
+  detailCacheDuration: 0,
+  description: "虎牙直播：热门列表直接用虎牙公开列表接口（不用登录、不用填 ID），点开现解析拉流地址。带直播线路和清晰度选择：默认线路=自动，自动时会按 TX、AL、HS、HS24、HW、AL13、TX15 的顺序逐条试，不只看 m3u8 有没有返回，还会去拿第一个 TS 片段，能下载到才算这条线路可用，拿不到就换下一条；手动选某条线路时也会在该线路不可用时兜底换线路。清晰度用虎牙转码流实现：流畅=_500、超清=_2000、蓝光4M=_4000、蓝光10M=_10000，接在流名后面（实测 660000 间这四档都返回可用 m3u8），转码档拿不到时自动回落原画。默认自动 + 流畅。关键：播放不走详情页缓存的 videoUrl，起播时由 loadResource 重新现解析并带 Referer/User-Agent 请求头返回资源，测试能过但播放失败（播放器拿不到带签名的地址、或拿到旧地址）就是这个原因。拉流地址带有时效签名，每次起播都会重新解析，不要保存旧地址。",
   author: "Forward",
   site: "https://github.com/InchStudio/ForwardWidgets",
   modules: [
@@ -55,6 +56,15 @@ WidgetMetadata = {
           ],
         },
       ],
+    },
+    {
+      id: "loadResource",
+      title: "加载资源",
+      functionName: "loadResource",
+      type: "stream",
+      cacheDuration: 0,
+      requiresWebView: false,
+      params: [],
     },
   ],
 };
@@ -406,4 +416,36 @@ async function loadDetail(link) {
       playerType: "system",
     };
   }
+}
+
+// 起播资源：这是 v1.0.4 的关键修复。
+// 测试能过、播放失败的典型原因：测试走 Widget.http（我们带了 UA + Referer），
+// 而详情页的 videoUrl 会被缓存、播放器起播时拿到的可能是旧签名地址，或者播放器
+// 不带 Referer/UA 去拉 CDN 被 403，表现就是黑屏转圈几秒后失败。
+// loadResource（id 必须固定为 loadResource，type 为 stream，cacheDuration 为 0）
+// 是 ForwardWidget 官方给直播用的路子：客户端在真正起播、切换线路、刷新资源时
+// 才会调用它，params 里会带上详情项的 link，我们在这里现解析、现返回带请求头的资源。
+async function loadResource(params = {}) {
+  var link = params.link || params.videoUrl || "";
+  // 有的客户端传的是 id 而不是 link，兜底按房间号处理
+  var parsed = parseLink(link);
+  if (!parsed.roomId && params.id) parsed.roomId = parseRoomId(params.id);
+  if (!parsed.roomId) throw new Error("loadResource 缺少房间号");
+  var s = await resolveStream(parsed.roomId, parsed.line, parsed.quality);
+  return [
+    {
+      name: "虎牙直播 · " + s.lineUsed + " · " + s.qualityUsed,
+      description: "线路 " + s.lineUsed + "（可选：" + s.linesAvailable + "）· 清晰度 " + s.qualityUsed,
+      url: s.videoUrl,
+      customHeaders: {
+        "User-Agent": UA,
+        Referer: "https://www.huya.com/",
+      },
+      headers: {
+        "User-Agent": UA,
+        Referer: "https://www.huya.com/",
+      },
+      playerType: "system",
+    },
+  ];
 }
