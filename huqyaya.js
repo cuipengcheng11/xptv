@@ -1,9 +1,9 @@
 WidgetMetadata = {
   id: "forward.huya-live",
   title: "虎牙直播",
-  version: "1.0.1",
+  version: "1.0.3",
   requiredVersion: "0.0.1",
-  description: "虎牙直播：热门列表直接用虎牙公开列表接口（不用登录、不用填 ID），点开现解析拉流地址。带直播线路和清晰度选择：线路是虎牙 CDN（AL/TX/HS 等），某条线路在你网络下 403/卡就换一条；清晰度用虎牙转码流实现：流畅=_500、超清=_2000、蓝光4M=_4000、蓝光10M=_10000，接在流名后面（实测 660000 间这四档都返回可用 m3u8），转码档拿不到时自动回落原画。拉流地址带有时效签名，每次点开都会重新解析，不要保存旧地址。",
+  description: "虎牙直播：热门列表直接用虎牙公开列表接口（不用登录、不用填 ID），点开现解析拉流地址。带直播线路和清晰度选择：默认线路=自动，自动时会按 TX、AL、HS、HS24、HW、AL13、TX15 的顺序逐条试，不只看 m3u8 有没有返回，还会去拿第一个 TS 片段，能下载到才算这条线路可用，拿不到就换下一条；手动选某条线路时也会在该线路不可用时兜底换线路。清晰度用虎牙转码流实现：流畅=_500、超清=_2000、蓝光4M=_4000、蓝光10M=_10000，接在流名后面（实测 660000 间这四档都返回可用 m3u8），转码档拿不到时自动回落原画。默认自动 + 流畅（最不卡）：虎牙 HLS 一次只给约 3 个片段、约 6 秒缓冲，原画 10M 在网络一般时跟不上就会几秒后黑屏转圈。拉流地址带有时效签名，每次点开都会重新解析，不要保存旧地址。",
   author: "Forward",
   site: "https://github.com/InchStudio/ForwardWidgets",
   modules: [
@@ -43,9 +43,9 @@ WidgetMetadata = {
         },
         {
           name: "quality",
-          title: "清晰度",
+          title: "清晰度（卡就选流畅）",
           type: "enumeration",
-          value: "auto",
+          value: "流畅",
           enumOptions: [
             { title: "原画（最高码率）", value: "auto" },
             { title: "蓝光10M", value: "蓝光10M" },
@@ -195,6 +195,42 @@ function transcodeUrl(hlsUrl, kbps) {
   return String(hlsUrl).replace(/\.m3u8\?/, "_" + kbps + ".m3u8?");
 }
 
+// 从 m3u8 里取第一个 TS 片段的完整地址（相对地址按 m3u8 所在目录解析）
+function firstTsUrl(m3u8Text, hlsUrl) {
+  var lines = String(m3u8Text || "").split("\n");
+  for (var i = 0; i < lines.length; i++) {
+    var t = lines[i].trim();
+    if (t && t.indexOf("#") !== 0 && t.indexOf(".ts") !== -1) {
+      if (t.indexOf("http") === 0) return t;
+      if (t.indexOf("/") === 0) {
+        var origin = String(hlsUrl).match(/^(https?:\/\/[^\/]+)/);
+        return (origin ? origin[1] : "") + t;
+      }
+      var base = String(hlsUrl).split("?")[0];
+      return base.slice(0, base.lastIndexOf("/") + 1) + t;
+    }
+  }
+  return "";
+}
+
+// TS 片段能不能下载到：只判断长度，TS 是二进制，长度很小或含错误页就是不可用。
+// 注意：如果运行环境不支持拉二进制，这个探测会失败，调用方会回落到只看 m3u8 的老逻辑，不会因此报错。
+async function tryTsUrl(url) {
+  if (!url) return false;
+  try {
+    var res = await Widget.http.get(url, {
+      headers: { "User-Agent": UA, Referer: "https://www.huya.com/" },
+    });
+    var data = res && res.data;
+    if (typeof data === "string") {
+      return data.length > 5000 && data.indexOf("403 Forbidden") === -1 && data.indexOf("<html") !== 0;
+    }
+    return !!data;
+  } catch (e) {
+    return false;
+  }
+}
+
 async function resolveStream(roomId, wantLine, wantQuality) {
   var res = await Widget.http.get("https://www.huya.com/" + roomId, {
     headers: { "User-Agent": UA, Referer: "https://www.huya.com/" },
@@ -228,6 +264,22 @@ async function resolveStream(roomId, wantLine, wantQuality) {
       seen[l.cdn] = true;
       return true;
     });
+  }
+
+  // 自动选线路：先逐条验证到真正能播的线路（m3u8 + 第一个 TS 片段都能拿到），
+  // 而不是只看 m3u8 返回了 #EXTM3U 就算可用——之前只看 m3u8 时，自动可能挑到 TS 拿不到的线路，
+  // 表现就是播几秒后黑屏转圈。如果所有线路的 TS 探测都不支持/都失败，就回落到老逻辑（只看 m3u8）。
+  if (!wantLine || wantLine === "auto") {
+    for (var vi = 0; vi < ordered.length; vi++) {
+      var candUrl = targetKbps ? transcodeUrl(ordered[vi].hlsUrl, targetKbps) : ordered[vi].hlsUrl;
+      var candProbe = await tryHlsUrl(candUrl);
+      if (!candProbe.ok) continue;
+      var tsUrl = firstTsUrl(candProbe.text, candUrl);
+      if (await tryTsUrl(tsUrl)) {
+        ordered = [ordered[vi]].concat(ordered.filter(function (l) { return l.cdn !== ordered[vi].cdn; }));
+        break;
+      }
+    }
   }
 
   var lastErr = "";
